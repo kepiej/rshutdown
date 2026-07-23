@@ -1,6 +1,10 @@
 name: Cross compile for ARM64
 
-on: [push]
+on:
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -24,10 +28,10 @@ jobs:
           cd build
           cmake ..
           make -j4 package
-          echo "::set-output name=ARM_DEB_PACKAGE::$(basename $(find . -maxdepth 1 -name *.deb))"
+          echo "::set-output name=ARM64_DEB_PACKAGE::$(basename $(find . -maxdepth 1 -name *.deb))"
 
       - name: Upload binary
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ steps.cross_compile.outputs.ARM_DEB_PACKAGE }}
-          path: ${{ github.workspace }}/build/${{ steps.cross_compile.outputs.ARM_DEB_PACKAGE }}
+          name: ${{ steps.cross_compile.outputs.ARM64_DEB_PACKAGE }}
+          path: ${{ github.workspace }}/build/${{ steps.cross_compile.outputs.ARM64_DEB_PACKAGE }}
