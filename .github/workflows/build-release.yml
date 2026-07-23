@@ -31,7 +31,7 @@ jobs:
           echo "::set-output name=ARM64_DEB_PACKAGE::$(basename $(find . -maxdepth 1 -name *.deb))"
 
       - name: Upload binary
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.cross_compile.outputs.ARM64_DEB_PACKAGE }}
           path: ${{ github.workspace }}/build/${{ steps.cross_compile.outputs.ARM64_DEB_PACKAGE }}
