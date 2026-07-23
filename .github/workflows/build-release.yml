@@ -22,7 +22,7 @@ jobs:
           apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu cmake build-essential
 
       - name: Cross compile
-      	id: cross_compile
+        id: cross_compile
         run: |
           mkdir build
           cd build
