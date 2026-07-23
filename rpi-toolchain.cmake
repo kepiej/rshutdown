@@ -1,5 +1,5 @@
 SET(CMAKE_SYSTEM_NAME Linux)
-SET(CMAKE_SYSTEM_PROCESSOR arm)
+SET(CMAKE_SYSTEM_PROCESSOR arm64)
 set(devel_root /opt/cross-pi-gcc-6.3.0-0)
 set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "armhf")
 set(CMAKE_C_COMPILER ${devel_root}/bin/arm-linux-gnueabihf-gcc)
