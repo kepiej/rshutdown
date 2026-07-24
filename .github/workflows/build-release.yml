@@ -1,14 +1,38 @@
-name: Cross compile for ARM64
+name: Build Linux packages
+
+permissions:
+  contents: write
 
 on:
   push:
     tags:
-      - '*'
+      - "*"
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04-arm
+    name: Build (${{ matrix.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+            packages: build-essential cmake
+
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+            packages: build-essential cmake
+
+          - arch: armhf
+            runner: ubuntu-24.04
+            packages: >
+              build-essential
+              cmake
+              gcc-arm-linux-gnueabihf
+              g++-arm-linux-gnueabihf
+
+    runs-on: ${{ matrix.runner }}
 
     steps:
       - name: Check out repo
@@ -16,22 +40,56 @@ jobs:
         with:
           submodules: true
 
-      - name: Install cross compiler and build utils
+      - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake
+          sudo apt-get install -y ${{ matrix.packages }}
 
-      - name: Cross compile
-        id: cross_compile
+      - name: Configure
         run: |
           mkdir build
           cd build
-          cmake ..
-          make -j4 package
-          echo "ARM64_DEB_PACKAGE=$(basename "$(find . -maxdepth 1 -name '*.deb')")" >> "$GITHUB_OUTPUT"
 
-      - name: Upload binary
+          if [ "${{ matrix.arch }}" = "armhf" ]; then
+            cmake .. \
+              -DCMAKE_TOOLCHAIN_FILE=../rpi-toolchain.cmake
+          else
+            cmake ..
+          fi
+
+      - name: Build package
+        id: build
+        run: |
+          cd build
+          make -j$(nproc) package
+          echo "PACKAGE=$(basename "$(find . -maxdepth 1 -name '*.deb')")" >> "$GITHUB_OUTPUT"
+
+      - name: Upload package
         uses: actions/upload-artifact@v6
         with:
-          name: ${{ steps.cross_compile.outputs.ARM64_DEB_PACKAGE }}
-          path: ${{ github.workspace }}/build/${{ steps.cross_compile.outputs.ARM64_DEB_PACKAGE }}
+          name: ${{ matrix.arch }}-${{ steps.build.outputs.PACKAGE }}
+          path: build/${{ steps.build.outputs.PACKAGE }}
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-24.04
+
+    # Only create releases for tag pushes
+    if: startsWith(github.ref, 'refs/tags/')
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v6
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*.deb
+          generate_release_notes: true

@@ -1,6 +1,11 @@
-SET(CMAKE_SYSTEM_NAME Linux)
-SET(CMAKE_SYSTEM_PROCESSOR arm64)
-set(devel_root /opt/cross-pi-gcc-6.3.0-0)
+set(CMAKE_SYSTEM_NAME Linux)
+set(CMAKE_SYSTEM_PROCESSOR arm)
+
+set(CMAKE_C_COMPILER arm-linux-gnueabihf-gcc)
+set(CMAKE_CXX_COMPILER arm-linux-gnueabihf-g++)
 set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "armhf")
-set(CMAKE_C_COMPILER ${devel_root}/bin/arm-linux-gnueabihf-gcc)
-set(CMAKE_C_FLAGS "-march=armv6 -mfloat-abi=hard -mfpu=vfp")
+
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)

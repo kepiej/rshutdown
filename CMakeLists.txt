@@ -53,8 +53,15 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "rshutdown is a lightweight remote shutdow
 set(PACKAGE_LONG_DESCRIPTION "It is primarily intended for shutting down headless Raspberry Pis cleanly when SSH access is impractical.")
 set(CPACK_PACKAGING_INSTALL_PREFIX "/usr")
 
-if(NOT CPACK_DEBIAN_PACKAGE_ARCHITECTURE)  # default if not set by toolchain file
-    set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "arm64")
+if(NOT CPACK_DEBIAN_PACKAGE_ARCHITECTURE)
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|amd64)$")
+        set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
+    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64)$")
+        set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "arm64")
+    else()
+        message(FATAL_ERROR
+            "CPACK_DEBIAN_PACKAGE_ARCHITECTURE not set for ${CMAKE_SYSTEM_PROCESSOR}")
+    endif()
 endif()
 
 set(CPACK_DEBIAN_PACKAGE_RELEASE "0")  # revision, i.e. changes in packaging
